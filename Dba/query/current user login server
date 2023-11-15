@@ -1,0 +1,13 @@
+SELECT     login_name,listconnection.host_name,last_request_start_time,listconnection.session_count FROM (
+SELECT
+    login_name,
+	host_name,
+	last_request_start_time,
+    COUNT(session_id) OVER (PARTITION BY login_name) AS session_count,
+    ROW_NUMBER() OVER (PARTITION BY login_name ORDER BY last_request_start_time DESC) AS row_num
+FROM
+    sys.dm_exec_sessions
+)listconnection
+	WHERE listconnection.row_num=1
+	--AND listconnection.login_name LIKE '%data%'
+ORDER BY listconnection.login_name DESC
